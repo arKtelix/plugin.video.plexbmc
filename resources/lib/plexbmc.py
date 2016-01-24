@@ -1585,7 +1585,7 @@ def channelSearch (url, prompt):
         PlexPlugins( url )
     return
 
-def getContent( url ):
+def getContent( url, query):
     '''
         This function takes teh URL, gets the XML and determines what the content is
         This XML is then redirected to the best processing function.
@@ -1598,9 +1598,12 @@ def getContent( url ):
     server=plex_network.get_server_from_url(url)
     lastbit=url.split('/')[-1]
     printDebug.debug("URL suffix: %s" % lastbit)
+    is_search = lastbit.startswith('search')
 
     #Catch search requests, as we need to process input before getting results.
-    if lastbit.startswith('search'):
+    if is_search and query:
+        url=url+'&query='+query
+    elif is_search:
         printDebug.debug("This is a search URL.  Bringing up keyboard")
         kb = xbmc.Keyboard('', 'heading')
         kb.setHeading('Enter search term')
@@ -4026,6 +4029,7 @@ def start_plexbmc():
     param_identifier=params.get('identifier')
     param_indirect=params.get('indirect')
     force=params.get('force')
+    param_query=params.get('query',None)
 
     if command is None:
         try:
@@ -4195,7 +4199,7 @@ def start_plexbmc():
                 displaySections()
 
             elif mode == MODE_GETCONTENT:
-                getContent(param_url)
+                getContent(param_url, param_query)
 
             elif mode == MODE_TVSHOWS:
                 TVShows(param_url)
